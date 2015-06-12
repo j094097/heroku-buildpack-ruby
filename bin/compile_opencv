@@ -35,6 +35,9 @@ indent() {
 
 if [ ! -f ${cache_target} ]; then
   echo "No cached compile detected. Building..." | indent
+
+  mkdir -p $target
+
   cd $build
 
   echo "Compiling cmake v${cmake_version}..." | indent
@@ -65,6 +68,8 @@ cache_target=$cache/$opencv_file
 build_target=$build/.heroku
 
 if [ ! -f $cache_target ]; then
+  mkdir -p $target
+  
   echo "No cached compile detected. Building..." | indent
 
   opencv_package="http://s3.amazonaws.com/tznode/vulcan-compiled-opencv.tgz"
