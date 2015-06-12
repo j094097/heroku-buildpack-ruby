@@ -64,33 +64,65 @@ echo "Cmake Complete..." | indent
 
 echo "Opencv Start..." | indent
 
-cache_target=$cache/$opencv_file
-build_target=$build/.heroku
+BUILD_DIR=$1
+CACHE_DIR=$2
 
-if [ ! -f $cache_target ]; then
-  mkdir -p $target
-  
-  echo "No cached compile detected. Building..." | indent
+# fetch and cache the vulcan build
+OPENCV_PACKAGE="http://s3.amazonaws.com/tznode/vulcan-compiled-opencv.tgz"
+OPENCV_PACKAGE_ETAG=$(curl -s --head "$OPENCV_PACKAGE" | grep -Ei '^etag' | sed -r 's/^etag|[^a-zA-Z0-9]+//gi')
+VENDORED_OPENCV="/app/vendor/opencv"
+OPENCV_CACHE="$CACHE_DIR/opencv_$OPENCV_PACKAGE_ETAG";
 
-  opencv_package="http://s3.amazonaws.com/tznode/vulcan-compiled-opencv.tgz"
-  # download open cv
-  vendored_opencv="/app/vendor/opencv"
-  mkdir -p $vendored_opencv
-  curl $opencv_package -s -o - | tar xzf - -C $vendored_opencv
-
-  # copy open cv libs to build dir
-  mkdir -p $build/lib
-  cp -a "$vendored_opencv/lib/." "$build/lib/"
-
-  tar czf $cache_target -C $vendored_opencv .
+if [ -d "$OPENCV_CACHE" ]; then
+  echo "-----> Reusing cached OpenCV ($OPENCV_PACKAGE_ETAG)"
+  cp -a $OPENCV_CACHE $VENDORED_OPENCV
+else
+  echo "-----> Fetching and caching OpenCV ($OPENCV_PACKAGE_ETAG)"
+  mkdir -p $VENDORED_OPENCV
+  curl $OPENCV_PACKAGE -s -o - | tar xzf - -C $VENDORED_OPENCV
+  mkdir -p $CACHE_DIR
+  cp -a $VENDORED_OPENCV $OPENCV_CACHE
 fi
 
-mkdir -p $build_target
-tar xzf $cache_target -C $build_target
+# vendor
+echo "-----> Vendoring OpenCV shared objects into slug"
+VENDORED_SO="$BUILD_DIR/vendor/opencv/lib"
+mkdir -p $VENDORED_SO
+cp -a "$VENDORED_OPENCV/lib/." $VENDORED_SO
 
-mkdir -p $build/.profile.d
+# runtime
+mkdir -p "$BUILD_DIR/.profile.d"
+echo "export LD_LIBRARY_PATH=\"\$HOME/vendor/opencv/lib:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/opencv.sh
+echo "export PKG_CONFIG_PATH=\"\$HOME/vendor/opencv/lib/pkgconfig:\$PKG_CONFIG_PATH\"" >> $BUILD_DIR/.profile.d/opencv.sh
 
-# ls -la $build/*
-# ls -la $target/*
 
-echo "export PATH=\$target/bin:\$PATH" > $build/.profile.d/opencv.sh
+# cache_target=$cache/$opencv_file
+# build_target=$build/.heroku
+
+# if [ ! -f $cache_target ]; then
+#   mkdir -p $target
+
+#   echo "No cached compile detected. Building..." | indent
+
+#   opencv_package="http://s3.amazonaws.com/tznode/vulcan-compiled-opencv.tgz"
+#   # download open cv
+#   vendored_opencv="/app/vendor/opencv"
+#   mkdir -p $vendored_opencv
+#   curl $opencv_package -s -o - | tar xzf - -C $vendored_opencv
+
+#   # copy open cv libs to build dir
+#   mkdir -p $build/lib
+#   cp -a "$vendored_opencv/lib/." "$build/lib/"
+
+#   tar czf $cache_target -C $vendored_opencv .
+# fi
+
+# mkdir -p $build_target
+# tar xzf $cache_target -C $build_target
+
+# mkdir -p $build/.profile.d
+
+# # ls -la $build/*
+# # ls -la $target/*
+
+# echo "export PATH=\$target/bin:\$PATH" > $build/.profile.d/opencv.sh
