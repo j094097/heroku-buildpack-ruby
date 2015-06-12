@@ -67,7 +67,7 @@ build_target=$build/.heroku
 if [ ! -f $cache_target ]; then
   echo "No cached compile detected. Building..." | indent
 
-  opencv_package="https://s3.amazonaws.com/bloominga-public/heroku/vulcan-compiled-opencv.tgz"
+  opencv_package="http://s3.amazonaws.com/tznode/vulcan-compiled-opencv.tgz"
   # download open cv
   vendored_opencv="/app/vendor/opencv"
   mkdir -p $vendored_opencv
