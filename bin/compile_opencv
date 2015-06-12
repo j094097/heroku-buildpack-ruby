@@ -92,11 +92,11 @@ cp -a "$VENDORED_OPENCV/lib/." $VENDORED_SO
 
 # runtime
 mkdir -p "$BUILD_DIR/.profile.d"
-echo "export LD_LIBRARY_PATH=\"\$HOME/vendor/opencv/lib:\$LD_LIBRARY_PATH\""
-echo "export PKG_CONFIG_PATH=\"\$HOME/vendor/opencv/lib/pkgconfig:\$PKG_CONFIG_PATH\""
 
 echo "export LD_LIBRARY_PATH=\"\$HOME/vendor/opencv/lib:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/opencv.sh
 echo "export PKG_CONFIG_PATH=\"\$HOME/vendor/opencv/lib/pkgconfig:\$PKG_CONFIG_PATH\"" >> $BUILD_DIR/.profile.d/opencv.sh
+
+ls -la $BUILD_DIR/*
 
 
 # cache_target=$cache/$opencv_file
