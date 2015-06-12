@@ -95,9 +95,11 @@ mkdir -p "$BUILD_DIR/.profile.d"
 
 #echo "export LD_LIBRARY_PATH=\"\$HOME/vendor/opencv/lib:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/opencv.sh
 #echo "export PKG_CONFIG_PATH=\"\$HOME/vendor/opencv/lib/pkgconfig:\$PKG_CONFIG_PATH\"" >> $BUILD_DIR/.profile.d/opencv.sh
-echo "export PATH=\"\$PATH:\"\$HOME/vendor/bin" > $BUILD_DIR/.profile.d/opencv.sh
 
 ls -la $BUILD_DIR/*
+ls -la $target/*
+
+echo "export PATH=\$target/bin:\$PATH" > $BUILD_DIR/.profile.d/opencv.sh
 
 
 # cache_target=$cache/$opencv_file
